@@ -1,24 +1,21 @@
 /**
  * 
  */
-package com.hastybox.typeincludetaglib;
+package com.hastybox.typeincludetaglib.tag;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.TagSupport;
+
+import com.hastybox.typeincludetaglib.wrapper.AttributeWrappingHttpServletRequestWrapper;
+import com.hastybox.typeincludetaglib.wrapper.OutputWrappingHttpServletResponseWrapper;
 
 /**
  * <p>
@@ -43,120 +40,6 @@ import javax.servlet.jsp.tagext.TagSupport;
  * 
  */
 public class IncludeTag extends TagSupport {
-
-	/**
-	 * ServletResponseWrapper that fetches the output in order to include it in
-	 * the original response later on.
-	 * 
-	 * @author psy
-	 * 
-	 */
-	private static final class OutputWrappingHttpServletResponseWrapper extends
-			HttpServletResponseWrapper {
-
-		/**
-		 * ServletOutputStream that stores the output in a ByteArrayOutputStream
-		 * for further usage.
-		 * 
-		 * @author psy
-		 * 
-		 */
-		private static final class StoringServletOutputStream extends
-				ServletOutputStream {
-			
-			/**
-			 * simple ByteArrayOutputStream to fetch output
-			 */
-			private ByteArrayOutputStream out;
-			
-			public StoringServletOutputStream() {
-				out = new ByteArrayOutputStream();
-			}
-
-			@Override
-			public void write(int b) throws IOException {
-				out.write(b);
-			}
-
-			/**
-			 * @return the out
-			 */
-			public ByteArrayOutputStream getOut() {
-				return out;
-			}
-
-		}
-
-		/**
-		 * Dummy ServletOutputStream
-		 */
-		private ServletOutputStream out;
-		
-		/**
-		 * Writer wrapped arout OutputStream
-		 */
-		private PrintWriter writer;
-
-		private OutputWrappingHttpServletResponseWrapper(
-				HttpServletResponse response) {
-			super(response);
-			// initialization
-			out = new StoringServletOutputStream();
-			
-			writer = new PrintWriter(out);
-		}
-
-		@Override
-		public ServletOutputStream getOutputStream() throws IOException {
-			return out;
-		}
-
-		@Override
-		public PrintWriter getWriter() throws IOException {
-			return writer;
-		}
-
-		public ByteArrayOutputStream getOut() {
-			return ((StoringServletOutputStream) out).getOut();
-		}
-
-	}
-
-	/**
-	 * Manages given attributes instead of attributes from original Request when
-	 * available
-	 * 
-	 * @author psy
-	 * 
-	 */
-	static private final class AttributeWrappingHttpServletRequestWrapper
-			extends HttpServletRequestWrapper {
-		private final Map<String, Object> wrappingAttributes;
-
-		private AttributeWrappingHttpServletRequestWrapper(
-				HttpServletRequest request) {
-			super(request);
-
-			// initialize
-			wrappingAttributes = new HashMap<String, Object>();
-		}
-
-		@Override
-		public void setAttribute(String name, Object o) {
-			wrappingAttributes.put(name, o);
-		}
-
-		@Override
-		public Object getAttribute(String name) {
-			// look for attribute in local container
-			Object o = wrappingAttributes.get(name);
-			if (o != null) {
-				return o;
-			}
-			// return attribute from original request
-			return super.getAttribute(name);
-		}
-	}
 
 	/**
 	 * serial id
@@ -200,12 +83,6 @@ public class IncludeTag extends TagSupport {
 	public int doStartTag() throws JspException {
 
 		try {
-			ServletRequest req = new AttributeWrappingHttpServletRequestWrapper(
-					(HttpServletRequest) pageContext.getRequest());
-			
-			// set attributes to "new" context
-			req.setAttribute("self", self);
-
 			// create path to jsp to be included
 			StringBuilder pathBuilder = new StringBuilder();
 			pathBuilder.append(BASEPATH);
@@ -226,12 +103,24 @@ public class IncludeTag extends TagSupport {
 			}
 			pathBuilder.append(".jsp");
 
+			RequestDispatcher requestDispatcher = pageContext.getRequest()
+					.getRequestDispatcher(pathBuilder.toString());
+
+			if (requestDispatcher == null) {
+				throw new JspException("Could not locate template");
+			}
+			
+			ServletRequest req = new AttributeWrappingHttpServletRequestWrapper(
+					(HttpServletRequest) pageContext.getRequest());
+			
 			OutputWrappingHttpServletResponseWrapper res = new OutputWrappingHttpServletResponseWrapper(
 					(HttpServletResponse) pageContext.getResponse());
-
-			pageContext.getRequest()
-					.getRequestDispatcher(pathBuilder.toString())
-					.include(req, res);
+			
+			// set attributes to "new" context
+			req.setAttribute("self", self);
+			
+			// include template
+			requestDispatcher.include(req, res);
 
 			// write stuff to outStream instead of flushing pageContext.getOut()
 			res.getWriter().flush();

@@ -9,7 +9,7 @@
 	<uri>http://hastybox.com/taglib/typeinc</uri>
 	<tag>
 		<name>include</name>
-		<tag-class>com.hastybox.typeincludetaglib.IncludeTag</tag-class>
+		<tag-class>com.hastybox.typeincludetaglib.tag.IncludeTag</tag-class>
 		<body-content>empty</body-content>
 		<attribute>
 			<name>self</name>
