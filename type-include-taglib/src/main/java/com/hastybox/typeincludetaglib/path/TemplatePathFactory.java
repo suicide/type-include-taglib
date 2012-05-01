@@ -27,7 +27,7 @@ public class TemplatePathFactory {
 	private static final String BASEPATH = "/WEB-INF/typeTemplates/";
 	
 	/**
-	 * store for path lookups
+	 * store for path lookups. Is it cool to store is here?
 	 */
 	private static final Map<String, String> PATH_STORE;
 	
