@@ -8,16 +8,35 @@
 	<short-name>typeinc</short-name>
 	<uri>http://hastybox.com/taglib/typeinc</uri>
 	<tag>
+		<description>Includes a JSP file based on the given objects type.</description>
 		<name>include</name>
 		<tag-class>com.hastybox.typeincludetaglib.tag.IncludeTag</tag-class>
-		<body-content>empty</body-content>
+		<body-content>JSP</body-content>
 		<attribute>
+			<description>Object who's type is used to find the correct JSP to include</description>
 			<name>self</name>
 			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<description>Template to render (optional)</description>
 			<name>template</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+	<tag>
+		<description>Adds an additional parameter to the include tag to pass to the included JSP</description>
+		<name>param</name>
+		<tag-class>com.hastybox.typeincludetaglib.tag.ParamTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<name>name</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>value</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>

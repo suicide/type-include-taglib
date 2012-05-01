@@ -4,6 +4,9 @@
 package com.hastybox.typeincludetaglib.tag;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -12,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.TagSupport;
+import javax.servlet.jsp.tagext.BodyTagSupport;
 
 import com.hastybox.typeincludetaglib.path.TemplatePathFactory;
 import com.hastybox.typeincludetaglib.wrapper.AttributeWrappingHttpServletRequestWrapper;
@@ -40,7 +43,7 @@ import com.hastybox.typeincludetaglib.wrapper.OutputWrappingHttpServletResponseW
  * @author psy
  * 
  */
-public class IncludeTag extends TagSupport {
+public class IncludeTag extends BodyTagSupport {
 
 	/**
 	 * serial id
@@ -56,6 +59,11 @@ public class IncludeTag extends TagSupport {
 	 * template to use for rendering
 	 */
 	private String template;
+
+	/**
+	 * parameter store
+	 */
+	private Map<String, Object> params;
 
 	/*
 	 * (non-Javadoc)
@@ -78,25 +86,38 @@ public class IncludeTag extends TagSupport {
 	@Override
 	public int doStartTag() throws JspException {
 
+		params = new HashMap<String, Object>();
+
+		return EVAL_BODY_BUFFERED;
+	}
+
+	@Override
+	public int doEndTag() throws JspException {
+
 		try {
 			String path = TemplatePathFactory.getPath(self, template);
-			
+
 			RequestDispatcher requestDispatcher = pageContext.getRequest()
 					.getRequestDispatcher(path);
 
 			if (requestDispatcher == null) {
 				throw new JspException("Could not locate template");
 			}
-			
+
 			ServletRequest req = new AttributeWrappingHttpServletRequestWrapper(
 					(HttpServletRequest) pageContext.getRequest());
-			
+
 			OutputWrappingHttpServletResponseWrapper res = new OutputWrappingHttpServletResponseWrapper(
 					(HttpServletResponse) pageContext.getResponse());
-			
+
 			// set attributes to "new" context
 			req.setAttribute("self", self);
-			
+
+			// add other parameters from Parameter Tags
+			for (Entry<String, Object> param : params.entrySet()) {
+				req.setAttribute(param.getKey(), param.getValue());
+			}
+
 			// include template
 			requestDispatcher.include(req, res);
 
@@ -112,12 +133,17 @@ public class IncludeTag extends TagSupport {
 			throw new JspException(e);
 		}
 
-		return SKIP_BODY;
+		return EVAL_PAGE;
 	}
 
-	@Override
-	public int doEndTag() throws JspException {
-		return EVAL_PAGE;
+	/**
+	 * adds a parameter to the tag
+	 * 
+	 * @param name
+	 * @param value
+	 */
+	public void addParam(String name, Object value) {
+		params.put(name, value);
 	}
 
 	/**
