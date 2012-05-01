@@ -14,6 +14,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import com.hastybox.typeincludetaglib.path.TemplatePathFactory;
 import com.hastybox.typeincludetaglib.wrapper.AttributeWrappingHttpServletRequestWrapper;
 import com.hastybox.typeincludetaglib.wrapper.OutputWrappingHttpServletResponseWrapper;
 
@@ -47,11 +48,6 @@ public class IncludeTag extends TagSupport {
 	private static final long serialVersionUID = 1561430403921500250L;
 
 	/**
-	 * base path for type templates to include
-	 */
-	private static final String BASEPATH = "/WEB-INF/typeTemplates/";
-
-	/**
 	 * object to render
 	 */
 	private Object self;
@@ -83,28 +79,10 @@ public class IncludeTag extends TagSupport {
 	public int doStartTag() throws JspException {
 
 		try {
-			// create path to jsp to be included
-			StringBuilder pathBuilder = new StringBuilder();
-			pathBuilder.append(BASEPATH);
-
-			// find package
-			Package selfPackage = self.getClass().getPackage();
-			if (selfPackage != null) {
-				pathBuilder.append(selfPackage.getName());
-			}
-			// add class name
-			pathBuilder.append("/");
-			pathBuilder.append(self.getClass().getSimpleName());
-
-			// add template if set
-			if (template != null) {
-				pathBuilder.append(".");
-				pathBuilder.append(template);
-			}
-			pathBuilder.append(".jsp");
-
+			String path = TemplatePathFactory.getPath(self, template);
+			
 			RequestDispatcher requestDispatcher = pageContext.getRequest()
-					.getRequestDispatcher(pathBuilder.toString());
+					.getRequestDispatcher(path);
 
 			if (requestDispatcher == null) {
 				throw new JspException("Could not locate template");
