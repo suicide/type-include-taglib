@@ -4,7 +4,7 @@
 
 	<groupId>com.hastybox</groupId>
 	<artifactId>type-include-taglib</artifactId>
-	<version>0.1.2</version>
+	<version>0.1.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>type-include-taglib</name>
