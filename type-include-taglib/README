@@ -1,1 +1,9 @@
 This is a simple implementation of a taglib that includes JSPs on given object types.
+
+It is basically an open source implementation of the basic functionality that CoreMedia
+provides with its cm:include Tag. This implementation however does not include "crazy"
+caching or what so ever.
+
+The Taglib is included using using the following URI:
+http://hastybox.com/taglib/typeinc
+
