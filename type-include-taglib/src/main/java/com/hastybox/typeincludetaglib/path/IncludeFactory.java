@@ -29,7 +29,7 @@ public class IncludeFactory {
 	/**
 	 * base path for type templates to include
 	 */
-	private static final String BASEPATH = "/WEB-INF/typeTemplates/";
+	public static final String BASEPATH = "/WEB-INF/typeTemplates/";
 
 	/**
 	 * store for path lookups. Is it cool to store is here?
@@ -207,6 +207,23 @@ public class IncludeFactory {
 		pathBuilder.append(".jsp");
 
 		return pathBuilder.toString();
+	}
+	
+	/**
+	 * clears include path cache
+	 */
+	public static void clearCache() {
+		PATH_STORE.clear();
+	}
+	
+	/**
+	 * 
+	 * exports Cache store
+	 * 
+	 * @return
+	 */
+	public static Map<String, String> getPathStore() {
+		return PATH_STORE;
 	}
 
 	/**
