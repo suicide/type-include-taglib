@@ -2,8 +2,18 @@ This is a simple implementation of a taglib that includes JSPs on given object t
 
 It is basically an open source implementation of the basic functionality that CoreMedia
 provides with its cm:include Tag. This implementation however does not include "crazy"
-caching or what so ever.
+caching or whatever.
 
 The Taglib is included using using the following URI:
 http://hastybox.com/taglib/typeinc
 
+Simple usage example:
+
+Lets say you have the following class:
+
+class ArticleImpl extends ArticleBase implements Article {}
+
+The library first tries to include an appropriate JSP for the given class of the instance (ArticleImpl).
+If it could not find a JSP it searches for the Interface(s!!) (Article). And if that fails also it
+searches for a JSP for the super class (ArticleBase). Then the cycle starts again until it
+hits java.lang.Object and fails afterwards. 
