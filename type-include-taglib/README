@@ -16,4 +16,26 @@ class ArticleImpl extends ArticleBase implements Article {}
 The library first tries to include an appropriate JSP for the given class of the instance (ArticleImpl).
 If it could not find a JSP it searches for the Interface(s!!) (Article). And if that fails also it
 searches for a JSP for the super class (ArticleBase). Then the cycle starts again until it
-hits java.lang.Object and fails afterwards. 
+hits java.lang.Object and fails afterwards.
+
+The library includes two tags: include and param. The usage is similar to tags of the core library:
+
+<typeinc:include self="${object}" template="teaser" >
+	<typeinc:param name="someParam" value="${someValue}">
+</typeinc:include>
+
+The "self" attribute is mandatory as it contains the object which's type is evaluated and thus
+a JSP is included.
+The "template" attribute is optional and decides which object template is to be included (see example later)
+The param tag passes additional parameters to the included JSP. However parameters form parent JSP are also
+available as long as they are not overridden by the param tag.
+
+JSPs have to be placed in /WEB-INF/typeTemplates (this can be changed in source code)
+
+example JSPs
+
+/WEB-INF/typeTemplates/{package.name}/{classname}{.template}.jsp
+
+/WEB-INF/typeTemplates/com.hastybox/Article.jsp
+/WEB-INF/typeTemplates/com.hastybox/Article.teaser.jsp
+/WEB-INF/typeTemplates/java.lang/Object.jsp
